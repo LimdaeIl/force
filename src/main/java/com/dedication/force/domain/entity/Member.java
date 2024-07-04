@@ -1,11 +1,13 @@
-package com.dedication.force.domain;
+package com.dedication.force.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Member {
@@ -24,9 +26,27 @@ public class Member {
     @Column(nullable = false)
     private String phone;
 
+    private ZonedDateTime createdAt;
+
+    private ZonedDateTime modifiedAt;
+
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
     private List<Article> articles;
 
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
     private List<Comment> comments;
+
+    private Member(String email, String password, String phone) {
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        this.createdAt = now;
+        this.modifiedAt = now;
+    }
+
+    public static Member of(String email, String password, String phone) {
+        return new Member(email, password, phone);
+    }
 }

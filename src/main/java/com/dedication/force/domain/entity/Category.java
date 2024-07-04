@@ -1,4 +1,4 @@
-package com.dedication.force.domain;
+package com.dedication.force.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
