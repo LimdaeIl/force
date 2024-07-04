@@ -1,6 +1,5 @@
 package com.dedication.force.domain.dto;
 
-import com.dedication.force.domain.entity.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -21,18 +20,4 @@ public record AddMemberRequest(
         @Pattern(regexp = "^[0-9]{10,11}$", message = "휴대전화번호: 10~11자 숫자만 입력해주세요.")
         @Size(min = 10, max = 11, message = "휴대전화번호: 10~11자 숫자만 입력해주세요.")
         String phone
-) {
-    public static AddMemberRequest from(Member member) {
-        return new AddMemberRequest(
-                member.getEmail(),
-                member.getPassword(),
-                member.getPhone());
-    }
-
-    public Member toEntity() {
-        return Member.of(
-                this.email,
-                this.password,
-                this.phone);
-    }
-}
+) { }
