@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -41,20 +42,17 @@ class AuthControllerTest {
 
     @DisplayName("[Member][POST]: 회원가입 성공")
     @Test
-    public void GivenValidMember_WhenSignUp_ThenSuccess() throws Exception {
+    public void GivenValidMember_WhenSignUp_ExpectedSuccess() throws Exception {
         // given
-        AddMemberRequest request = new AddMemberRequest(
+        Member member = Member.of(
                 "spring@naver.com",
-                "SpringBoot3.x",
+                "SpringBoot3!",
                 "01012341234"
         );
 
-        // when
-        Member savedMember = request.toEntity();
-
-        // then
+        // Expected
         mockMvc.perform(post("/api/v1/auth")
-                .content(objectMapper.writeValueAsString(savedMember))
+                .content(objectMapper.writeValueAsString(member))
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(1))
@@ -65,20 +63,18 @@ class AuthControllerTest {
 
     @DisplayName("[Member][POST]: 회원가입 실패- 유효성")
     @Test
-    public void GivenInValidEmailMember_WhenSignUp_ThenFail() throws Exception {
+    public void GivenInValidEmailMember_WhenSignUp_ExpectedFail() throws Exception {
         // given
-        AddMemberRequest request = new AddMemberRequest(
+        Member member = Member.of(
                 "spring",
-                "SpringBoot3",
+                "SpringBoot",
                 "12341234"
         );
 
-        // when
-        Member savedMember = request.toEntity();
 
-        // then
+        // Expected
         mockMvc.perform(post("/api/v1/auth")
-                        .content(objectMapper.writeValueAsString(savedMember))
+                        .content(objectMapper.writeValueAsString(member))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(-1))
@@ -93,18 +89,15 @@ class AuthControllerTest {
     @Test
     public void GivenEmptyMember_WhenSignUp_ThenFail() throws Exception {
         // given
-        AddMemberRequest request = new AddMemberRequest(
+        Member member = Member.of(
                 null,
                 null,
                 null
         );
 
-        // when
-        Member savedMember = request.toEntity();
-
-        // then
+        // Expected
         mockMvc.perform(post("/api/v1/auth")
-                        .content(objectMapper.writeValueAsString(savedMember))
+                        .content(objectMapper.writeValueAsString(member))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(-1))

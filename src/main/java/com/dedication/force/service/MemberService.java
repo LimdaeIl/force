@@ -2,9 +2,11 @@ package com.dedication.force.service;
 
 import com.dedication.force.common.exception.CustomAPIException;
 import com.dedication.force.domain.dto.AddMemberRequest;
+import com.dedication.force.domain.entity.Member;
 import com.dedication.force.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.regex.Matcher;
@@ -15,6 +17,9 @@ import java.util.regex.Pattern;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
 
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
     private static final String PHONE_PATTERN = "^[0-9]{10,11}$";
@@ -43,7 +48,15 @@ public class MemberService {
         checkMemberPhone(request.phone());
         checkMemberEmail(request.email());
 
-        memberRepository.save(request.toEntity());
+        String encodedPassword = bCryptPasswordEncoder.encode(request.password());
+
+        Member member = Member.of(
+                request.email(),
+                encodedPassword,
+                request.phone()
+        );
+
+        memberRepository.save(member);
     }
 
 
