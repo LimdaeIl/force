@@ -3,14 +3,19 @@ package com.dedication.force.service;
 import com.dedication.force.common.exception.CustomAPIException;
 import com.dedication.force.domain.dto.AddMemberRequest;
 import com.dedication.force.domain.entity.Member;
+import com.dedication.force.domain.entity.QMember;
 import com.dedication.force.repository.MemberRepository;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.dedication.force.domain.entity.QMember.member;
 
 @RequiredArgsConstructor
 @Service
@@ -19,6 +24,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JPAQueryFactory queryFactory;
 
 
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
@@ -33,7 +39,7 @@ public class MemberService {
         if (memberRepository.existsByEmail(email)) {throw new CustomAPIException("이미 가입된 이메일 입니다.");}
     }
 
-    // 전화번호 중복 확인한기
+    // 전화번호 중복 확인하기
     public void checkMemberPhone(String phone) {
         Matcher phoneRex = Pattern.compile(PHONE_PATTERN).matcher(phone);
 
@@ -57,6 +63,16 @@ public class MemberService {
         );
 
         memberRepository.save(member);
+    }
+
+    // 모든 회원 조회
+    @Transactional
+    public List<Member> allMember() {
+        QMember qMember = QMember.member; //기본 인스턴스 사용
+
+        return queryFactory.selectFrom(qMember)
+                .orderBy(qMember.createdAt.asc())
+                .fetch();
     }
 
 
