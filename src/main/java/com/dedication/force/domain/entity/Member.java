@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -17,7 +18,7 @@ public class Member {
     @Column(name = "member_id", nullable = false, updatable = false)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -31,10 +32,13 @@ public class Member {
     private ZonedDateTime modifiedAt;
 
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
-    private List<Article> articles;
+    private final List<Article> articles = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
-    private List<Comment> comments;
+    private final List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
+    private final List<MemberRole> memberRoles = new ArrayList<>();
 
     private Member(String email, String password, String phone) {
         this.email = email;
