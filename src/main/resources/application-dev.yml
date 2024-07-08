@@ -16,3 +16,11 @@ spring:
 logging.level:
   org.hibernate.SQL: debug
 #  org.hibernate.type: trace
+
+
+---
+
+jwt:
+  key:
+    access: rkGU45258GGhiolLO2465TFY5345kGU45258GGhiolLO2465TFY5345
+    refresh: rkGU45258GGhiolLO2465TFY5345kGU45258GGhiolLO2465TFY5345
