@@ -2,16 +2,16 @@ package com.dedication.force.controller;
 
 import com.dedication.force.common.HttpResponse;
 import com.dedication.force.domain.dto.AddMemberRequest;
+import com.dedication.force.domain.entity.Member;
 import com.dedication.force.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -29,6 +29,10 @@ public class AuthController {
     }
 
     // 모든 회원 조회
+    @GetMapping("")
+    public ResponseEntity<HttpResponse<List<Member>>> allMember() {
+        return new ResponseEntity<>(new HttpResponse<>(1, "모든 회원 조회입니다.", memberService.allMember()), HttpStatus.OK);
+    }
 
     // 단건 회원 조회(id)
 
