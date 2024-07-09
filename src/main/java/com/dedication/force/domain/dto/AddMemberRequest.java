@@ -3,7 +3,9 @@ package com.dedication.force.domain.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record AddMemberRequest(
         @NotBlank(message = "이메일: 필수 정보입니다.")
         @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "이메일: 유효한 이메일 주소를 입력해주세요.")
@@ -20,4 +22,6 @@ public record AddMemberRequest(
         @Pattern(regexp = "^[0-9]{10,11}$", message = "휴대전화번호: 10~11자 숫자만 입력해주세요.")
         @Size(min = 10, max = 11, message = "휴대전화번호: 10~11자 숫자만 입력해주세요.")
         String phone
-) { }
+) {
+
+}

@@ -22,4 +22,8 @@ public class Role {
 
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private List<MemberRole> memberRoles;
+
+    public Role(RoleType roleType) {
+        this.roleType = roleType;
+    }
 }
