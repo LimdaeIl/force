@@ -1,7 +1,11 @@
 package com.dedication.force.controller;
 
+import com.dedication.force.domain.dto.AddMemberRequest;
 import com.dedication.force.domain.entity.Member;
+import com.dedication.force.domain.entity.Role;
+import com.dedication.force.domain.entity.RoleType;
 import com.dedication.force.repository.MemberRepository;
+import com.dedication.force.repository.RoleRepository;
 import com.dedication.force.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,12 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.springframework.http.MediaType.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,8 +39,9 @@ class AuthControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+
     @Autowired
-    private MemberService memberService;
+    private RoleRepository roleRepository;
 
     @BeforeEach
     public void clean() {
@@ -49,15 +52,18 @@ class AuthControllerTest {
     @Test
     public void GivenValidMember_WhenSignUp_ExpectedSuccess() throws Exception {
         // given
-        Member member = Member.of(
-                "spring@naver.com",
-                "SpringBoot3!",
-                "01012341234"
-        );
+        AddMemberRequest request = AddMemberRequest.builder()
+                .email("spring@naver.com")
+                .password("SpringBoot3!")
+                .phone("01012341234")
+                .build();
+
+        Role role = new Role(RoleType.USER);
+        roleRepository.save(role);
 
         // Expected
-        mockMvc.perform(post("/api/v1/auth")
-                .content(objectMapper.writeValueAsString(member))
+        mockMvc.perform(post("/api/v1/auth/signup")
+                .content(objectMapper.writeValueAsString(request))
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(1))
@@ -70,16 +76,17 @@ class AuthControllerTest {
     @Test
     public void GivenInValidEmailMember_WhenSignUp_ExpectedFail() throws Exception {
         // given
-        Member member = Member.of(
-                "spring",
-                "SpringBoot",
-                "12341234"
-        );
+        AddMemberRequest request = AddMemberRequest.builder()
+                .email("spring")
+                .password("SpringBoot3")
+                .phone("0101234")
+                .build();
+
 
 
         // Expected
-        mockMvc.perform(post("/api/v1/auth")
-                        .content(objectMapper.writeValueAsString(member))
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(-1))
@@ -94,15 +101,16 @@ class AuthControllerTest {
     @Test
     public void GivenEmptyMember_WhenSignUp_ThenFail() throws Exception {
         // given
-        Member member = Member.of(
-                null,
-                null,
-                null
-        );
+        AddMemberRequest request = AddMemberRequest.builder()
+                .email(null)
+                .password(null)
+                .phone(null)
+                .build();
+
 
         // Expected
-        mockMvc.perform(post("/api/v1/auth")
-                        .content(objectMapper.writeValueAsString(member))
+        mockMvc.perform(post("/api/v1/auth/signup")
+                        .content(objectMapper.writeValueAsString(request))
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(-1))
@@ -122,6 +130,7 @@ class AuthControllerTest {
                 "SpringBoot3!",
                 "01012341234"
         );
+
         Member member2 = Member.of(
                 "python@naver.com",
                 "python3.12.1",
