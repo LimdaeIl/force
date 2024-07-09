@@ -72,6 +72,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String getRefreshTokenFromRequest(HttpServletRequest request) {
         // Refresh Token 을 어디서 가져올지는 결정해야 합니다.
         // 예를 들어, 쿠키에서 가져올 수도 있습니다.
-        return request.getHeader("Refresh-Token");
+        return request.getHeader("refresh-token");
     }
 }
