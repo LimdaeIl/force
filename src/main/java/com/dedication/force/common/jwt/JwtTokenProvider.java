@@ -41,6 +41,10 @@ public class JwtTokenProvider {
         return createToken(request, REFRESH_TOKEN_SECRET_KEY, REFRESH_TOKEN_EXPIRE_COUNT, "refresh-token");
     }
 
+    public String createJWTToken(JwtTokenRequest request, byte[] secretKey, Long validityDuration, String tokenType) {
+        return createToken(request, secretKey, validityDuration, tokenType);
+    }
+
     private String createToken(JwtTokenRequest request, byte[] secretKey, Long validityDuration, String tokenType) {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         ZonedDateTime validityDate = now.plus(Duration.ofMillis(validityDuration));
@@ -60,7 +64,7 @@ public class JwtTokenProvider {
                 .setNotBefore(Date.from(now.toInstant()))
                 .setIssuedAt(Date.from(now.toInstant()))
                 .setId(jti)
-                .signWith(getSigningKey(secretKey))
+                .signWith(getSigningKey(secretKey), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -78,12 +82,24 @@ public class JwtTokenProvider {
         return claimsResolver.apply(claims);
     }
 
+    public Date getExpirationTimeFromToken(String token, byte[] secretKey) {
+        return getClaimFromToken(token, Claims::getExpiration, secretKey);
+    }
+
     public String getEmailFromToken(String token, byte[] secretKey) {
         return getClaimFromToken(token, Claims::getSubject, secretKey);
     }
 
     public String getTokenTypeFromToken(String token, byte[] secretKey) {
         return getClaimFromToken(token, claims -> claims.get("tokenType", String.class), secretKey);
+    }
+
+    public Claims getAllClaimsFromToken(String token, byte[] secretKey) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey(secretKey))
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public Boolean validateToken(String token, byte[] secretKey) {
@@ -109,5 +125,7 @@ public class JwtTokenProvider {
         }
         return false;
     }
+
+
 
 }
