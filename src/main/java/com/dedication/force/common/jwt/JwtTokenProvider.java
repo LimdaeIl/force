@@ -1,5 +1,6 @@
 package com.dedication.force.common.jwt;
 
+import com.dedication.force.common.exception.CustomJwtException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
@@ -13,7 +14,9 @@ import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @Slf4j
@@ -53,6 +56,7 @@ public class JwtTokenProvider {
 
         Claims claims = Jwts.claims().setSubject(request.getEmail());
         claims.put("userId", request.getMemberId());
+        claims.put("roles", request.getRoles());
         claims.put("tokenType", tokenType);
 
         return Jwts.builder()
@@ -72,6 +76,14 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(secretKey);
     }
 
+    public Boolean isTokenExpiringSoon(String token, byte[] secretKey, Long timeInMinutes) {
+        Date expiration = getExpirationTimeFromToken(token, secretKey);
+        Date now = new Date();
+        // Calculate the difference in minutes between now and expiration time
+        long diffInMinutes = (expiration.getTime() - now.getTime()) / (1000 * 60);
+        return diffInMinutes < timeInMinutes;
+    }
+
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver, byte[] secretKey) {
         final Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey(secretKey))
@@ -84,6 +96,20 @@ public class JwtTokenProvider {
 
     public Date getExpirationTimeFromToken(String token, byte[] secretKey) {
         return getClaimFromToken(token, Claims::getExpiration, secretKey);
+    }
+
+    public Long getMemberIdFromToken(String token, byte[] secretKey) {
+        return getClaimFromToken(token, claims -> claims.get("userId", Long.class), secretKey);
+    }
+
+    public List<String> getMemberRolesFromToken(String token, byte[] secretKey) {
+        return getClaimFromToken(token, claims -> {
+            List<String> roles = claims.get("roles", List.class);
+            if (roles == null) {
+                throw new CustomJwtException("토큰에서 권한 정보를 찾을 수 없습니다.");
+            }
+            return roles;
+        }, secretKey);
     }
 
     public String getEmailFromToken(String token, byte[] secretKey) {
@@ -110,22 +136,13 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
             return true;
-        } catch (SecurityException e) {
-            log.error("유효하지 않은 JWT 서명입니다: {}", e.getMessage());
-        } catch (MalformedJwtException e) {
-            log.error("유효하지 않은 JWT 형식입니다: {}", e.getMessage());
+        } catch (SecurityException | MalformedJwtException | UnsupportedJwtException | MissingClaimException e) {
+            log.error("유효하지 않은 JWT: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
             log.warn("만료된 JWT 토큰입니다: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            log.error("지원하지 않는 JWT 토큰입니다: {}", e.getMessage());
-        } catch (MissingClaimException e) {
-            log.error("필수 클레임이 누락되었습니다: {}", e.getMessage());
         } catch (JwtException e) {
-            log.error("유효하지 않은 JWT 토큰입니다: {}", e.getMessage());
+            log.error("유효하지 않은 JWT 토큰: {}", e.getMessage());
         }
         return false;
     }
-
-
-
 }
