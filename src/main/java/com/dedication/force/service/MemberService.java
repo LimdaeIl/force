@@ -5,16 +5,16 @@ import com.dedication.force.common.exception.CustomDataNotFoundException;
 import com.dedication.force.common.exception.CustomForbiddenException;
 import com.dedication.force.common.jwt.JwtTokenProvider;
 import com.dedication.force.common.jwt.JwtTokenRequest;
-import com.dedication.force.domain.dto.AddMemberRequest;
-import com.dedication.force.domain.dto.LoginMemberRequest;
-import com.dedication.force.domain.dto.LoginMemberResponse;
+import com.dedication.force.common.jwt.TokenType;
+import com.dedication.force.common.security.CustomUserDetailsService;
+import com.dedication.force.domain.dto.*;
 import com.dedication.force.domain.entity.*;
 import com.dedication.force.repository.MemberRepository;
-import com.dedication.force.repository.MemberRoleRepository;
 import com.dedication.force.repository.RoleRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +28,13 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
-    private final MemberRoleRepository memberRoleRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     private final TokenStorageService tokenStorageService;
-
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JPAQueryFactory queryFactory;
 
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final CustomUserDetailsService customUserDetailsService;
 
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
     private static final String PHONE_PATTERN = "^[0-9]{10,11}$";
@@ -117,7 +116,7 @@ public class MemberService {
         String accessToken = jwtTokenProvider.createAccessToken(jwtTokenRequest);
         String refreshToken = jwtTokenProvider.createRefreshToken(jwtTokenRequest);
 
-        tokenStorageService.addToken(refreshToken, "refresh_token");
+        tokenStorageService.addToken(refreshToken, TokenType.REFRESH_TOKEN);
 
         return LoginMemberResponse.builder()
                 .memberId(member.getId())
@@ -126,14 +125,48 @@ public class MemberService {
                 .build();
     }
 
+    // 토큰 재발급
+    @Transactional
+    public LoginMemberResponse refreshTokenReissue(RefreshTokenRequest request) {
+        Boolean isValidateToken = jwtTokenProvider.validateToken(request.refreshToken(), jwtTokenProvider.getREFRESH_TOKEN_SECRET_KEY());
+        Boolean isRefreshTokenExpiringSoon = jwtTokenProvider.isTokenExpiringSoon(request.refreshToken(), jwtTokenProvider.getREFRESH_TOKEN_SECRET_KEY(), 60 * 24L);
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(request.refreshToken(), jwtTokenProvider.getREFRESH_TOKEN_SECRET_KEY());
+        String email = jwtTokenProvider.getEmailFromToken(request.refreshToken(), jwtTokenProvider.getREFRESH_TOKEN_SECRET_KEY());
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+        // 리프레시 토큰이 유효하고 만료 시간이 24 시간 이상 남은 경우: 액세스 토큰만 재발행
+        if (isValidateToken && !isRefreshTokenExpiringSoon) {
+            String newAccessToken = jwtTokenProvider.createAccessToken(new JwtTokenRequest(userDetails));
+            return LoginMemberResponse.builder()
+                    .memberId(memberId)
+                    .accessToken(newAccessToken)
+                    .refreshToken(request.refreshToken())
+                    .build();
+        }
+
+        // 리프레시 토큰이 만료되거나 만료 시간이 24시간 미만 남은 경우: 액세스 토큰, 리프레시 토큰 재발행
+        String newAccessToken = jwtTokenProvider.createAccessToken(new JwtTokenRequest(userDetails));
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(new JwtTokenRequest(userDetails));
+        return LoginMemberResponse.builder()
+                .memberId(memberId)
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
+
     // 모든 회원 조회
     @Transactional
-    public List<Member> findAllMember() {
-        QMember qMember = QMember.member; //기본 인스턴스 사용
+    public List<MemberDto> findAllMember() {
+        List<Member> members = memberRepository.findAll();
 
-        return queryFactory.selectFrom(qMember)
-                .orderBy(qMember.createdAt.asc())
-                .fetch();
+        return members.stream()
+                .map(member -> new MemberDto(
+                        member.getId(),
+                        member.getEmail(),
+                        member.getPhone(),
+                        member.getCreatedAt(),
+                        member.getModifiedAt())
+                ).toList();
     }
 
 

@@ -1,10 +1,7 @@
 package com.dedication.force.controller;
 
 import com.dedication.force.common.HttpResponse;
-import com.dedication.force.domain.dto.AddMemberRequest;
-import com.dedication.force.domain.dto.LoginMemberRequest;
-import com.dedication.force.domain.dto.LoginMemberResponse;
-import com.dedication.force.domain.entity.Member;
+import com.dedication.force.domain.dto.*;
 import com.dedication.force.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,15 +31,21 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<HttpResponse<LoginMemberResponse>> login(@RequestBody @Valid LoginMemberRequest request, BindingResult result) {
         LoginMemberResponse loginMemberResponse = memberService.login(request);
-        return new ResponseEntity<>(new HttpResponse<>(1, " 로그인에 성공했습니다.", loginMemberResponse), HttpStatus.CREATED);
+        return new ResponseEntity<>(new HttpResponse<>(1, " 로그인에 성공했습니다.", loginMemberResponse), HttpStatus.OK);
+    }
+
+    // JWT 토큰 재발급
+    @PostMapping("/token-reissue")
+    public ResponseEntity<HttpResponse<LoginMemberResponse>> refreshTokenReissue(@RequestBody RefreshTokenRequest request) {
+        LoginMemberResponse loginMemberResponse = memberService.refreshTokenReissue(request);
+        return new ResponseEntity<>(new HttpResponse<>(1, "토큰을 재발급 합니다.", loginMemberResponse), HttpStatus.OK);
     }
 
     // 회원 로그아웃
 
-
     // 모든 회원 조회
-    @GetMapping("")
-    public ResponseEntity<HttpResponse<List<Member>>> findAllMember() {
+    @GetMapping("/findAll")
+    public ResponseEntity<HttpResponse<List<MemberDto>>> findAllMember() {
         return new ResponseEntity<>(new HttpResponse<>(1, "모든 회원 조회입니다.", memberService.findAllMember()), HttpStatus.OK);
     }
 
@@ -55,8 +58,4 @@ public class AuthController {
     // 회원 수정
 
     // 회원 삭제
-
-    // JWT 엑세스 토큰 재발급
-
-    // JWT 리프레시 토큰 재발급
 }

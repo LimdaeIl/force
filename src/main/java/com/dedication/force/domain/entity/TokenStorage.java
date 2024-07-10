@@ -1,5 +1,6 @@
 package com.dedication.force.domain.entity;
 
+import com.dedication.force.common.jwt.TokenType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,14 +23,16 @@ public class TokenStorage {
     @Column(length = 512, nullable = false)
     private String token;
 
-    private String tokenType;
+    @Enumerated(EnumType.STRING)
+    private TokenType tokenType;
 
     private Date createdAt;
 
     @Builder
-    public TokenStorage(String token, String tokenType) {
+    public TokenStorage(String token, TokenType tokenType) {
         this.token = token;
         this.tokenType = tokenType;
         this.createdAt = Date.from(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toInstant());
     }
+
 }
