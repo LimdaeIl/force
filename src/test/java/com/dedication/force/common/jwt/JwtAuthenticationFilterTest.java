@@ -17,14 +17,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
-import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @DisplayName("[JWT] JwtAuthenticationFilter")
 @ActiveProfiles("test")
-class JwtAuthenticationFilterTest {
+class JwtAuthenticationFilterTest  {
 
 
     @Mock

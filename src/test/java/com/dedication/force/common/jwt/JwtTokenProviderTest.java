@@ -209,5 +209,22 @@ class JwtTokenProviderTest {
         Assertions.assertThat(tokenTypeFromToken).isEqualTo("access-token");
     }
 
+    @DisplayName("[JWT 회원 권한 출력")
+    @Test
+    public void GivenToken_ExpectedGetRoles() {
+        // Given
+        JwtTokenRequest request = JwtTokenRequest.builder()
+                .memberId(1L)
+                .email("accessToken@naver.com")
+                .roles(List.of(RoleType.USER.toString()))
+                .build();
+
+        String accessToken = jwtTokenProvider.createAccessToken(request);
+
+        // Expected
+        List<String> memberRolesFromToken = jwtTokenProvider.getMemberRolesFromToken(accessToken, jwtTokenProvider.getACCESS_TOKEN_SECRET_KEY());
+        Assertions.assertThat(memberRolesFromToken.contains(RoleType.USER.toString())).isTrue();
+    }
+
 
 }
