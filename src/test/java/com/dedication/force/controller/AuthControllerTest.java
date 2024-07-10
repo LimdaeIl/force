@@ -1,12 +1,15 @@
 package com.dedication.force.controller;
 
 import com.dedication.force.domain.dto.AddMemberRequest;
-import com.dedication.force.domain.entity.Member;
+import com.dedication.force.domain.dto.LoginMemberRequest;
+import com.dedication.force.domain.dto.LoginMemberResponse;
+import com.dedication.force.domain.dto.RefreshTokenRequest;
 import com.dedication.force.domain.entity.Role;
 import com.dedication.force.domain.entity.RoleType;
 import com.dedication.force.repository.MemberRepository;
 import com.dedication.force.repository.RoleRepository;
 import com.dedication.force.service.MemberService;
+import com.dedication.force.service.TokenStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("[Member] 컨트롤러")
@@ -39,6 +43,8 @@ class AuthControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private MemberService memberService;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -46,6 +52,7 @@ class AuthControllerTest {
     @BeforeEach
     public void clean() {
         memberRepository.deleteAll();
+        roleRepository.deleteAll();
     }
 
     @DisplayName("[Member][POST]: 회원가입 성공")
@@ -63,8 +70,8 @@ class AuthControllerTest {
 
         // Expected
         mockMvc.perform(post("/api/v1/auth/signup")
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(APPLICATION_JSON))
+                        .content(objectMapper.writeValueAsString(request))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.code").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("회원가입에 성공했습니다."))
@@ -81,7 +88,6 @@ class AuthControllerTest {
                 .password("SpringBoot3")
                 .phone("0101234")
                 .build();
-
 
 
         // Expected
@@ -125,24 +131,27 @@ class AuthControllerTest {
     @Test
     public void GivenMembers_WhenSavedMembers_ThenSuccess() throws Exception {
         // given
-        Member member1 = Member.of(
-                "spring@naver.com",
-                "SpringBoot3!",
-                "01012341234"
-        );
+        AddMemberRequest request1 = AddMemberRequest.builder()
+                .email("spring@naver.com")
+                .password("SpringBoot3!")
+                .phone("01012341234")
+                .build();
 
-        Member member2 = Member.of(
-                "python@naver.com",
-                "python3.12.1",
-                "01045674567"
-        );
+        AddMemberRequest request2 = AddMemberRequest.builder()
+                .email("python@naver.com")
+                .password("Python3.12!")
+                .phone("01045674567")
+                .build();
+
+        Role role = new Role(RoleType.USER);
+        roleRepository.save(role);
 
         // when
-        memberRepository.save(member1);
-        memberRepository.save(member2);
+        memberService.addMember(request1);
+        memberService.addMember(request2);
 
-         // then
-        mockMvc.perform(get("/api/v1/auth")
+        // then
+        mockMvc.perform(get("/api/v1/auth/findAll")
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.size()").value(2))
@@ -150,6 +159,112 @@ class AuthControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].phone").value("01012341234"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[1].email").value("python@naver.com"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[1].phone").value("01045674567"))
+                .andDo(print());
+    }
+
+    @DisplayName("[Member][POST]: 로그인 성공")
+    @Test
+    public void GivenIDPasswordExpectedLoginSuccess() throws Exception {
+        // given
+        AddMemberRequest request = AddMemberRequest.builder()
+                .email("spring@naver.com")
+                .password("SpringBoot3!")
+                .phone("01012341234")
+                .build();
+
+        Role role = new Role(RoleType.USER);
+        roleRepository.save(role);
+
+        memberService.addMember(request);
+
+        LoginMemberRequest loginMemberRequest = new LoginMemberRequest(request.email(), request.password());
+
+        // Expected
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .content(objectMapper.writeValueAsString(loginMemberRequest))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @DisplayName("[Member][POST]: 로그인 아이디 실패")
+    @Test
+    public void GivenInCorrectIDAndCorrectPassword_ExpectedLoginFailure() throws Exception {
+        // given
+        AddMemberRequest request = AddMemberRequest.builder()
+                .email("spring@naver.com")
+                .password("SpringBoot3!")
+                .phone("01012341234")
+                .build();
+
+        Role role = new Role(RoleType.USER);
+        roleRepository.save(role);
+
+        memberService.addMember(request);
+
+        LoginMemberRequest loginMemberRequest = new LoginMemberRequest("python@naver.com", request.password());
+
+        // Expected
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .content(objectMapper.writeValueAsString(loginMemberRequest))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @DisplayName("[Member][POST]: 로그인 비밀번호 실패")
+    @Test
+    public void GivenCorrectIDAndInCorrectPassword_ExpectedLogin_ThenFailure() throws Exception {
+        // given
+        AddMemberRequest request = AddMemberRequest.builder()
+                .email("spring@naver.com")
+                .password("SpringBoot3!")
+                .phone("01012341234")
+                .build();
+
+        Role role = new Role(RoleType.USER);
+        roleRepository.save(role);
+
+        memberService.addMember(request);
+
+        LoginMemberRequest loginMemberRequest = new LoginMemberRequest(request.email(), "python3.12!");
+
+        // Expected
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .content(objectMapper.writeValueAsString(loginMemberRequest))
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
+    @DisplayName("[Member][POST]: 토큰 재발급 성공")
+    @Test
+    public void GivenRefreshToken_ExpectedReIssueToken() throws Exception {
+        // given
+        AddMemberRequest request = AddMemberRequest.builder()
+                .email("spring@naver.com")
+                .password("SpringBoot3!")
+                .phone("01012341234")
+                .build();
+
+        Role role = new Role(RoleType.USER);
+        roleRepository.save(role);
+
+        memberService.addMember(request);
+        LoginMemberRequest loginMemberRequest = new LoginMemberRequest(request.email(), request.password());
+        LoginMemberResponse loginMemberResponse = memberService.login(loginMemberRequest);
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest(loginMemberResponse.getRefreshToken());
+        System.out.println("refreshTokenRequest.refreshToken() = " + refreshTokenRequest.refreshToken());
+
+        // Expected
+        mockMvc.perform(post("/api/v1/auth/token-reissue")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(refreshTokenRequest)))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("토큰을 재발급 합니다."))
+                .andExpect(jsonPath("$.data.memberId").value(1))
+                .andExpect(jsonPath("$.data.accessToken").exists())
+                .andExpect(jsonPath("$.data.refreshToken").value(refreshTokenRequest.refreshToken()))
                 .andDo(print());
     }
 }
