@@ -1,5 +1,6 @@
 package com.dedication.force.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,12 +32,15 @@ public class Member {
 
     private ZonedDateTime modifiedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
     private final List<Article> articles = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
     private final List<Comment> comments = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member", cascade = {CascadeType.ALL})
     private final List<MemberRole> memberRoles = new ArrayList<>();
 
