@@ -1,9 +1,6 @@
 package com.dedication.force.common;
 
-import com.dedication.force.common.exception.CustomAPIException;
-import com.dedication.force.common.exception.CustomDataNotFoundException;
-import com.dedication.force.common.exception.CustomForbiddenException;
-import com.dedication.force.common.exception.CustomValidationException;
+import com.dedication.force.common.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -45,4 +42,12 @@ public class CustomExceptionHandler {
         log.error(e.getMessage());
         return new ResponseEntity<>(new HttpResponse<>(-1, e.getMessage(), e.getErrorMap()), BAD_REQUEST);
     }
+
+    @ExceptionHandler(CustomJwtException.class)
+    @ResponseStatus(UNAUTHORIZED)
+    public ResponseEntity<HttpResponse<Void>> JWTException(CustomAPIException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(new HttpResponse<>(-1, e.getMessage(), null), UNAUTHORIZED);
+    }
+
 }
