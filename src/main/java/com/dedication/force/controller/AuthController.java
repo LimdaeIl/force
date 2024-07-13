@@ -42,6 +42,11 @@ public class AuthController {
     }
 
     // 회원 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<HttpResponse<Void>> logout(@RequestBody LogoutRequest request) {
+        memberService.logout(request);
+        return new ResponseEntity<>(new HttpResponse<>(1, "로그아웃에 성공했습니다.", null), HttpStatus.OK);
+    }
 
     // 모든 회원 조회
     @GetMapping("/findAll")
