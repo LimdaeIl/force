@@ -3,6 +3,7 @@ package com.dedication.force.service;
 import com.dedication.force.common.exception.CustomAPIException;
 import com.dedication.force.common.exception.CustomDataNotFoundException;
 import com.dedication.force.common.exception.CustomForbiddenException;
+import com.dedication.force.common.exception.CustomJwtException;
 import com.dedication.force.common.jwt.JwtTokenProvider;
 import com.dedication.force.common.jwt.JwtTokenRequest;
 import com.dedication.force.common.jwt.TokenType;
@@ -11,6 +12,8 @@ import com.dedication.force.domain.dto.*;
 import com.dedication.force.domain.entity.*;
 import com.dedication.force.repository.MemberRepository;
 import com.dedication.force.repository.RoleRepository;
+import com.dedication.force.repository.TokenBlacklistRepository;
+import com.dedication.force.repository.TokenStorageRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklistRepository tokenBlacklistRepository;
+    private final TokenStorageRepository tokenStorageRepository;
 
     private final TokenStorageService tokenStorageService;
     private final JPAQueryFactory queryFactory;
@@ -124,6 +129,25 @@ public class MemberService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    // 회원 로그아웃
+    @Transactional
+    public void logout(LogoutRequest request) {
+        if(tokenBlacklistRepository.existsByToken(request.refreshToken())) {
+            throw new CustomJwtException("블랙리스트에 등록된 토큰입니다.");
+        }
+
+        TokenStorage tokenStorage = tokenStorageRepository.findByToken(request.refreshToken())
+                .orElseThrow(() -> new CustomJwtException("존재하지 않는 토큰입니다."));
+
+        TokenBlacklist tokenBlacklist = TokenBlacklist.builder()
+                .token(request.refreshToken())
+                .build();
+
+        tokenStorageRepository.delete(tokenStorage);
+        tokenBlacklistRepository.save(tokenBlacklist);
+    }
+
 
     // 토큰 재발급
     @Transactional
