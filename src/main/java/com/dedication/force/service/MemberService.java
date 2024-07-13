@@ -158,6 +158,10 @@ public class MemberService {
         String email = jwtTokenProvider.getEmailFromToken(request.refreshToken(), jwtTokenProvider.getREFRESH_TOKEN_SECRET_KEY());
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
+        if (tokenBlacklistRepository.existsByToken(request.refreshToken())) {
+            throw new CustomJwtException("블랙리스트에 등록된 토큰입니다.");
+        }
+
         // 리프레시 토큰이 유효하고 만료 시간이 24 시간 이상 남은 경우: 액세스 토큰만 재발행
         if (isValidateToken && !isRefreshTokenExpiringSoon) {
             String newAccessToken = jwtTokenProvider.createAccessToken(new JwtTokenRequest(userDetails));
