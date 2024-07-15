@@ -1,6 +1,6 @@
-package com.dedication.force.article.domain.dto;
+package com.dedication.force.member.domain.dto;
 
-import com.dedication.force.article.domain.entity.Member;
+import com.dedication.force.member.domain.entity.Member;
 
 import java.time.ZonedDateTime;
 

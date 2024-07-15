@@ -4,7 +4,7 @@ import com.dedication.force.common.jwt.JwtTokenProvider;
 import com.dedication.force.common.jwt.dto.JwtTokenRequest;
 import com.dedication.force.common.jwt.entity.TokenType;
 import com.dedication.force.common.jwt.dto.TokenStorageDto;
-import com.dedication.force.article.domain.entity.RoleType;
+import com.dedication.force.member.domain.entity.RoleType;
 import com.dedication.force.common.jwt.entity.TokenStorage;
 import com.dedication.force.common.jwt.repository.TokenStorageRepository;
 import com.dedication.force.common.jwt.service.TokenStorageService;

@@ -1,4 +1,4 @@
-package com.dedication.force.article.domain.entity;
+package com.dedication.force.member.domain.entity;
 
 public enum RoleType {
     USER,

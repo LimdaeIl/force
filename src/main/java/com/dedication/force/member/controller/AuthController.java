@@ -1,8 +1,8 @@
 package com.dedication.force.member.controller;
 
-import com.dedication.force.article.domain.dto.*;
 import com.dedication.force.common.HttpResponse;
 import com.dedication.force.common.jwt.dto.RefreshTokenRequest;
+import com.dedication.force.member.domain.dto.*;
 import com.dedication.force.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

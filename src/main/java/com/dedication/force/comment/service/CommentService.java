@@ -1,6 +1,6 @@
-package com.dedication.force.article.service;
+package com.dedication.force.comment.service;
 
-import com.dedication.force.article.repository.CommentRepository;
+import com.dedication.force.comment.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
