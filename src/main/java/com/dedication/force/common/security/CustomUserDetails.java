@@ -1,6 +1,6 @@
 package com.dedication.force.common.security;
 
-import com.dedication.force.domain.entity.Member;
+import com.dedication.force.article.domain.entity.Member;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

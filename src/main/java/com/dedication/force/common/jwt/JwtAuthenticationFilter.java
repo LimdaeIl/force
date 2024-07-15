@@ -1,5 +1,6 @@
 package com.dedication.force.common.jwt;
 
+import com.dedication.force.common.jwt.dto.JwtTokenRequest;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
