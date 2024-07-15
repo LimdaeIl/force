@@ -1,6 +1,7 @@
 package com.dedication.force.common.jwt;
 
 import com.dedication.force.common.exception.CustomJwtException;
+import com.dedication.force.common.jwt.dto.JwtTokenRequest;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
@@ -16,7 +17,6 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @Slf4j

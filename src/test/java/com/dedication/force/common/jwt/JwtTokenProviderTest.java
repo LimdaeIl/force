@@ -1,6 +1,7 @@
 package com.dedication.force.common.jwt;
 
-import com.dedication.force.domain.entity.RoleType;
+import com.dedication.force.article.domain.entity.RoleType;
+import com.dedication.force.common.jwt.dto.JwtTokenRequest;
 import io.jsonwebtoken.Claims;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

@@ -1,12 +1,13 @@
 package com.dedication.force.service;
 
 import com.dedication.force.common.jwt.JwtTokenProvider;
-import com.dedication.force.common.jwt.JwtTokenRequest;
-import com.dedication.force.common.jwt.TokenType;
-import com.dedication.force.domain.dto.TokenStorageDto;
-import com.dedication.force.domain.entity.RoleType;
-import com.dedication.force.domain.entity.TokenStorage;
-import com.dedication.force.repository.TokenStorageRepository;
+import com.dedication.force.common.jwt.dto.JwtTokenRequest;
+import com.dedication.force.common.jwt.entity.TokenType;
+import com.dedication.force.common.jwt.dto.TokenStorageDto;
+import com.dedication.force.article.domain.entity.RoleType;
+import com.dedication.force.common.jwt.entity.TokenStorage;
+import com.dedication.force.common.jwt.repository.TokenStorageRepository;
+import com.dedication.force.common.jwt.service.TokenStorageService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

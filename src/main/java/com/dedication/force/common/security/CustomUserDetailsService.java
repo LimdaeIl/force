@@ -1,7 +1,7 @@
 package com.dedication.force.common.security;
 
-import com.dedication.force.domain.entity.Member;
-import com.dedication.force.repository.MemberRepository;
+import com.dedication.force.article.domain.entity.Member;
+import com.dedication.force.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UserDetails;

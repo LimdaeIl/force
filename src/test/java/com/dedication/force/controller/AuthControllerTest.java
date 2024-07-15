@@ -1,15 +1,14 @@
 package com.dedication.force.controller;
 
-import com.dedication.force.domain.dto.AddMemberRequest;
-import com.dedication.force.domain.dto.LoginMemberRequest;
-import com.dedication.force.domain.dto.LoginMemberResponse;
-import com.dedication.force.domain.dto.RefreshTokenRequest;
-import com.dedication.force.domain.entity.Role;
-import com.dedication.force.domain.entity.RoleType;
-import com.dedication.force.repository.MemberRepository;
-import com.dedication.force.repository.RoleRepository;
-import com.dedication.force.service.MemberService;
-import com.dedication.force.service.TokenStorageService;
+import com.dedication.force.article.domain.dto.AddMemberRequest;
+import com.dedication.force.article.domain.dto.LoginMemberRequest;
+import com.dedication.force.article.domain.dto.LoginMemberResponse;
+import com.dedication.force.common.jwt.dto.RefreshTokenRequest;
+import com.dedication.force.article.domain.entity.Role;
+import com.dedication.force.article.domain.entity.RoleType;
+import com.dedication.force.member.repository.MemberRepository;
+import com.dedication.force.member.repository.RoleRepository;
+import com.dedication.force.member.service.MemberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
