@@ -1,6 +1,6 @@
 package com.dedication.force.member.repository;
 
-import com.dedication.force.article.domain.entity.Member;
+import com.dedication.force.member.domain.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

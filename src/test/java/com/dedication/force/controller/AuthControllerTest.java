@@ -1,11 +1,11 @@
 package com.dedication.force.controller;
 
-import com.dedication.force.article.domain.dto.AddMemberRequest;
-import com.dedication.force.article.domain.dto.LoginMemberRequest;
-import com.dedication.force.article.domain.dto.LoginMemberResponse;
+import com.dedication.force.member.domain.dto.AddMemberRequest;
+import com.dedication.force.member.domain.dto.LoginMemberRequest;
+import com.dedication.force.member.domain.dto.LoginMemberResponse;
 import com.dedication.force.common.jwt.dto.RefreshTokenRequest;
-import com.dedication.force.article.domain.entity.Role;
-import com.dedication.force.article.domain.entity.RoleType;
+import com.dedication.force.member.domain.entity.Role;
+import com.dedication.force.member.domain.entity.RoleType;
 import com.dedication.force.member.repository.MemberRepository;
 import com.dedication.force.member.repository.RoleRepository;
 import com.dedication.force.member.service.MemberService;

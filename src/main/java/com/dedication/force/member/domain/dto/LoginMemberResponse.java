@@ -1,4 +1,4 @@
-package com.dedication.force.article.domain.dto;
+package com.dedication.force.member.domain.dto;
 
 import lombok.Builder;
 import lombok.Getter;

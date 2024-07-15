@@ -1,6 +1,5 @@
 package com.dedication.force.member.service;
 
-import com.dedication.force.article.domain.dto.*;
 import com.dedication.force.article.domain.entity.*;
 import com.dedication.force.common.exception.CustomAPIException;
 import com.dedication.force.common.exception.CustomDataNotFoundException;
@@ -13,6 +12,8 @@ import com.dedication.force.common.jwt.dto.RefreshTokenRequest;
 import com.dedication.force.common.jwt.entity.TokenBlacklist;
 import com.dedication.force.common.jwt.entity.TokenStorage;
 import com.dedication.force.common.security.CustomUserDetailsService;
+import com.dedication.force.member.domain.dto.*;
+import com.dedication.force.member.domain.entity.*;
 import com.dedication.force.member.repository.MemberRepository;
 import com.dedication.force.member.repository.RoleRepository;
 import com.dedication.force.common.jwt.repository.TokenBlacklistRepository;

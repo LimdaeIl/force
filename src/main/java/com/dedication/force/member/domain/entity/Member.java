@@ -1,7 +1,7 @@
-package com.dedication.force.article.domain.entity;
+package com.dedication.force.member.domain.entity;
 
-import com.dedication.force.member.domain.entity.Article;
-import com.dedication.force.member.domain.entity.Comment;
+import com.dedication.force.article.domain.entity.Article;
+import com.dedication.force.comment.domain.entity.Comment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
